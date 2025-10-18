@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct KeyboardView: View {
-    @StateObject var keyboardModel: KeyboardModelStandard = KeyboardModelStandard()
-    var onKeyTap: (KeyModel) -> Void
-
+    var keyboardModel: KeyboardModelStandard = KeyboardModelStandard()
+    var onTap: (KeyModel) -> Void
+    
     var body: some View {
         let rows = chunked(keyboardModel.keys, into: 4)
 
@@ -18,7 +18,7 @@ struct KeyboardView: View {
             ForEach(rows, id: \.self) { row in
                 GridRow {
                     ForEach(row, id: \.self) { key in
-                        KeyView(keyModel: key, onTap: onKeyTap)
+                        KeyView(keyModel: key, onTap: onTap)
                             .background(.yellow)
                     }
                 }
@@ -37,5 +37,5 @@ struct KeyboardView: View {
 }
 
 #Preview {
-    KeyboardView()
+    KeyboardView { _ in }
 }

@@ -39,7 +39,7 @@ extension KeyboardModelStandard {
             KeyModel.stub,
             KeyModel.digit(0),
             KeyModel.stub,
-            KeyModel.reset
+            KeyModel.result
         ]
     }
 }
