@@ -13,8 +13,7 @@ import JavaScriptCore
     func swiftFunc()
 }
 
-
-class CalculatorEngine: ObservableObject {
+class CalculatorEngine: NSObject, ObservableObject {
     @Published var display: String = ""
     
     // Контекст JavaScriptCore для выполнения JS
@@ -28,35 +27,37 @@ class CalculatorEngine: ObservableObject {
         return context
     }()
     
-    init() {
+    override init() {
+        super.init()
         loadJavaScriptFromBundle()
-        jsContext.setObject(self, forKeyedSubscript: "Bridge" as (NSCopying & NSObjectProtocol))
+        // Регистрируем мост в JS. Ключ — обычная строка.
+        // Можно напрямую:
+        // jsContext.setObject(self, forKeyedSubscript: "Bridge" as NSString)
+        // Либо упаковать в JSValue:
+        if let bridgeValue = JSValue(object: self, in: jsContext) {
+            jsContext.setObject(bridgeValue, forKeyedSubscript: "Bridge" as NSString)
+        } else {
+            // fallback на прямую установку
+            jsContext.setObject(self, forKeyedSubscript: "Bridge" as NSString)
+        }
     }
-    
-
     
     func pressKey(key: KeyModel) {
         switch key {
         case .digit(let digit):
             display += String(digit)
-            
         case .operation2operands(let sign):
             display += sign
-            
         case .operation1operand(let sign):
             display += sign
-            
         case .reset:
             display = ""
-            
         case .removeLast:
             if !display.isEmpty {
                 display.removeLast()
             }
-            
         case .stub:
             break
-            
         case .result:
             display = calc()
         }
@@ -85,8 +86,6 @@ extension CalculatorEngine {
         }
     }
     
-  
-    
     // Выполняет текущее выражение display через JS-функцию evaluate(expr) и возвращает строку
     private func calc() -> String {
         let expr = display.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -105,4 +104,3 @@ extension CalculatorEngine {
         return result?.toString() ?? ""
     }
 }
-
